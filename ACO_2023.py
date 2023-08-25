@@ -1,16 +1,24 @@
-# Commented out IPython magic to ensure Python compatibility.
-#from google.colab import drive
-#drive.mount('/gdrive')
-# %cd /gdrive
-#!ls "/gdrive/My Drive?MSSP_2021.csv"
-
-import streamlit as st
-import pandas as pd
 import numpy as np
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib as plt
-df=pd.read_csv("https://raw.githubusercontent.com/mangospace/ACO-2022-Performance-Explorer-V1/main/MSSP_2021.csv")  
+import requests
+import json
+import regex as re
+import streamlit as st
+
+#downloaded ACO data
+df=pd.read_csv("https://raw.githubusercontent.com/mangospace/ACO_Perf_2023/main/Performance_Year_Financial_and_Quality_Results_2022.csv")  
+#created using ACO_address.py; data stored in aco_addresses_geocoded.csv
+dataz=pd.read_csv("https://raw.githubusercontent.com/mangospace/ACO_Perf_2023/main/aco_addresses_geocoded.csv")  
+dataz=dataz[['ACO_ID',"ACO_State","lat","long"]]
+dataz=dataz.drop_duplicates()
+dataz=dataz.reset_index()
+
+
+df=df.merge(dataz, left_on='ACO_ID', right_on='ACO_ID')
+
 
 df['ACO_Name']= df['ACO_Name'].str.replace("Accountable Care Organization","")
 df['ACO_Name']= df['ACO_Name'].str.replace("Aco","")
@@ -21,6 +29,7 @@ df['ACO_Name']= df['ACO_Name'].str.replace("Medical Center","Center")
 df['ACO_Name']= df['ACO_Name'].str.replace(" of "," ")
 df['ACO_Name']= df['ACO_Name'].str.replace(" Of "," ")
 df['ACO_Name']= df['ACO_Name'].str.replace("The ","")
+
 df['ACO_Name']= df['ACO_Name'].str.replace(" llc","")
 df['ACO_Name']= df['ACO_Name'].str.replace("LLC","")
 df['ACO_Name']= df['ACO_Name'].str.replace(", PLLC","")
@@ -49,18 +58,27 @@ df['ACO_Name']= df['ACO_Name'].str.replace("Healthcare","Health")
 df['ACO_Name']= df['ACO_Name'].str.replace("ACO-ES","")
 df['ACO_Name']= df['ACO_Name'].str.strip()
 #df['ACO_Name']= df['ACO_Name'].str.title()
-df.loc[df['ACO_Name'].str.split().str.len() >2,'ACO_Name']=df['ACO_Name'].str.replace(" ACO","")
+
+df=df.rename(columns={"Measure_484": "Measure_MCC1","Sav_rate":"Sav_Rate"})
+df['QualScore']=df['QualScore'].str.replace("%","")
+df['Sav_Rate']=df['Sav_Rate'].str.replace("%","")
+
+
 df['ACO_identifier1']= df['ACO_Name']+"- "+df['ACO_State']
-convn = ['Measure_MCC1','P_EM_PCP_Vis','Perc_Dual','Measure_479','CapAnn_HHA','MaxShareRate','FinalShareRate','QualityID_113','QualityID_112', 'N_AB', 'N_PCP', 'N_Ben_Race_Black', 'N_Ben_Race_Hisp','N_Ben_Race_Other' ,'QualScore',
-         'N_Ben_Race_Native', 'N_Ben_Race_Asian','N_Ben_Race_White', 'Sav_Rate']
+convn = ['Measure_MCC1','P_EM_PCP_Vis','Perc_Dual','Measure_479','CapAnn_HHA','FinalShareRate','QualityID_113','QualityID_112', 'N_AB', 'N_PCP', 'N_Ben_Race_Black', 'N_Ben_Race_Hisp','N_Ben_Race_Other' ,'QualScore',
+         'N_Ben_Race_Native', 'N_Ben_Race_Asian','N_Ben_Race_White', 'Sav_Rate','P_EDV_Vis','P_EDV_Vis_HOSP','ADM_Rehab']
 convn1=[]
 for i in convn:
   if df[i].dtype==object:
     convn1.append(i)
+
 for i in convn1:
   df[i]=df[i].str.replace(",","")
   df[i]=df[i].str.replace("%","")
+  df[i]=df[i].str.replace("*","")
   df[i]=df[i].apply(pd.to_numeric, errors='coerce')
+
+
 
 df['ptperpcp']=pd.to_numeric(df['N_AB'])/pd.to_numeric(df['N_PCP'])
 df['AfAmHispshare1']= (df['N_Ben_Race_Black'].add( df['N_Ben_Race_Hisp'], fill_value=0)) / (df['N_Ben_Race_Black']+ df['N_Ben_Race_Hisp'] + df['N_Ben_Race_Other'] + df['N_Ben_Race_Native'] + df['N_Ben_Race_Asian'] + df['N_Ben_Race_White']).astype(float)
@@ -79,9 +97,6 @@ ADM_S_Trm_medH=df.loc[(df['Rev_Exp_Cat'] == "High Revenue")]['ADM_S_Trm'].median
 ADM_S_Trm_minH=df.loc[(df['Rev_Exp_Cat'] == "High Revenue")]['ADM_S_Trm'].min() #112
 
 #ED visits
-df['P_EDV_Vis']=df['P_EDV_Vis'].str.replace(",","")
-df['P_EDV_Vis_HOSP']=pd.to_numeric(df['P_EDV_Vis_HOSP'])
-df['P_EDV_Vis']=pd.to_numeric(df['P_EDV_Vis'])
 df['ED_V']=df['P_EDV_Vis'] + df['P_EDV_Vis_HOSP']
 #df['ED_V']=df['P_EDV_Vis', 'P_EDV_Vis_HOSP'].sum(axis = 1, skipna = True)
 df['admfrac']=round(df['P_EDV_Vis_HOSP'] *100/ (df['P_EDV_Vis']+df['P_EDV_Vis']),2)
@@ -132,6 +147,8 @@ df['CMS_HCC_RiskScore_AGND_PY'].median() #1.016
 df.loc[(df['Rev_Exp_Cat'] == "High Revenue")]['CMS_HCC_RiskScore_AGND_PY'].median() #1.0005
 
 df1=df
+
+df1.loc[df1['ACO_ID']=="A1001",'ACO_Name'].values[0]
 
 st.title('ACO 2022 Performance Explorer V0.0')
 st.header("Please don't be deterred by ugly red box(es). They disappear as you enter required fields.")
@@ -342,7 +359,8 @@ if len(val3) != 0:
                   plt.show()
                   st.pyplot(fig)
 
-                  dfmerge=pd.read_csv('https://raw.githubusercontent.com/mangospace/ACO-2022-Performance-Explorer-V1/main/df2018-2022.csv')
+#                 dfmerge=pd.read_csv('https://raw.githubusercontent.com/mangospace/ACO-2022-Performance-Explorer-V1/main/df2018-2022.csv')
+                  dfmerge=pd.read_csv('https://raw.githubusercontent.com/mangospace/ACO_Perf_2023/main/df2018-2023.csv')
                   df_sav=dfmerge[['ACO_Name','year','ADM_S_Trm','ACO_ID']]
 
                   mat=list(df3.ACO_ID)

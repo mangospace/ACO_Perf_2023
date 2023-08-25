@@ -88,8 +88,9 @@ df18['QualScore']=df18['QualScore']*100
 df18['FinalShareRate']=df18['FinalShareRate']*100
 df19['FinalShareRate']=df19['FinalShareRate']*100
 df21['FinalShareRate']=df21['FinalShareRate'].str.replace("%","")
-df18['QualScore']=df18['QualScore']/100
+df18['QualScore']=df18['QualScore']
 df22['QualScore']=df22['QualScore'].str.replace("%","")
+df22['Sav_Rate']=df22['Sav_Rate'].str.replace("%","")
  
 
 for i in convn:

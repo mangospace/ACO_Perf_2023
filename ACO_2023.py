@@ -83,7 +83,6 @@ for i in convn1:
 df['ptperpcp']=pd.to_numeric(df['N_AB'])/pd.to_numeric(df['N_PCP'])
 df['AfAmHispshare1']= (df['N_Ben_Race_Black'].add( df['N_Ben_Race_Hisp'], fill_value=0)) / (df['N_Ben_Race_Black']+ df['N_Ben_Race_Hisp'] + df['N_Ben_Race_Other'] + df['N_Ben_Race_Native'] + df['N_Ben_Race_Asian'] + df['N_Ben_Race_White']).astype(float)
 
-print(df['AfAmHispshare1'])
 
 #PCP visits for all the ACOs
 P_EM_PCP_Vis_med=df['P_EM_PCP_Vis'].median() #3714.0
@@ -312,7 +311,6 @@ if len(val3) != 0:
 
                   st.subheader("Racial diversity among ACO members")
                   st.caption(f"Orange line indicates ACO ID: {val3}")
-                  try:  
                   df3.AfAmHispshare1=df3.AfAmHispshare1*100
                   fig,ax = plt.subplots(1,1)
                   (n, bins, patches) = ax.hist(df3.AfAmHispshare1 , bins=5, label='hst',edgecolor='black', linewidth=0.5)

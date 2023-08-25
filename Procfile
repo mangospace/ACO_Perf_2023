@@ -1,0 +1,1 @@
+web: sh setup.sh && streamlit run ACO_2023.py

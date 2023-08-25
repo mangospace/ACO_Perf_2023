@@ -66,7 +66,8 @@ df['Sav_Rate']=df['Sav_Rate'].str.replace("%","")
 
 df['ACO_identifier1']= df['ACO_Name']+"- "+df['ACO_State']
 convn = ['Measure_MCC1','P_EM_PCP_Vis','Perc_Dual','Measure_479','CapAnn_HHA','FinalShareRate','QualityID_113','QualityID_112', 'N_AB', 'N_PCP', 'N_Ben_Race_Black', 'N_Ben_Race_Hisp','N_Ben_Race_Other' ,'QualScore',
-         'N_Ben_Race_Native', 'N_Ben_Race_Asian','N_Ben_Race_White', 'Sav_Rate','P_EDV_Vis','P_EDV_Vis_HOSP','ADM_Rehab']
+         'N_Ben_Race_Native', 'N_Ben_Race_Asian','N_Ben_Race_White', 'Sav_Rate','P_EDV_Vis','P_EDV_Vis_HOSP','ADM_Rehab','QualityID_001_WI']
+
 convn1=[]
 for i in convn:
   if df[i].dtype==object:
@@ -77,8 +78,6 @@ for i in convn1:
   df[i]=df[i].str.replace("%","")
   df[i]=df[i].str.replace("*","0")
   df[i]=df[i].apply(pd.to_numeric, errors='coerce')
-
-
 
 df['ptperpcp']=pd.to_numeric(df['N_AB'])/pd.to_numeric(df['N_PCP'])
 df['AfAmHispshare1']= (df['N_Ben_Race_Black'].add( df['N_Ben_Race_Hisp'], fill_value=0)) / (df['N_Ben_Race_Black']+ df['N_Ben_Race_Hisp'] + df['N_Ben_Race_Other'] + df['N_Ben_Race_Native'] + df['N_Ben_Race_Asian'] + df['N_Ben_Race_White']).astype(float)
@@ -128,14 +127,17 @@ df.loc[(df['Rev_Exp_Cat'] == "High Revenue")]['ADM_Rehab'].min() #11
 
 #Readmissions
 Measure_479_med=df['Measure_479'].median() * 100 #.1553
+Measure_479_med=round(Measure_479_med,2)
 Measure_479_medH=df.loc[(df['Rev_Exp_Cat'] == "High Revenue")]['Measure_479'].median() * 100 #.15325
 Measure_479_min=df['Measure_479'].min() #.1553
 Measure_479_minH=df.loc[(df['Rev_Exp_Cat'] == "High Revenue")]['Measure_479'].min()#.15325
 
 #admissions of complex patients
 Measure_MCC1_med=df['Measure_MCC1'].median() #33.94
+Measure_MCC1_med=round(Measure_MCC1_med,1)
 Measure_MCC1_medH=df.loc[(df['Rev_Exp_Cat'] == "High Revenue")]['Measure_MCC1'].median() #34.59
 Measure_MCC1_min=df['Measure_MCC1'].min() #17.64
+Measure_MCC1_min=round(Measure_MCC1_min,1)
 Measure_MCC1_minH=df.loc[(df['Rev_Exp_Cat'] == "High Revenue")]['Measure_MCC1'].min() #23.04
 
 
@@ -530,7 +532,7 @@ if len(val3) != 0:
                   (n, bins, patches) = ax.hist(df3.CMS_HCC_RiskScore_AGND_PY, bins=5, edgecolor='black', linewidth=0.5, align='left')
                   #ax.hist(df3.CMS_HCC_RiskScore_AGND_BY3, bins=5, edgecolor='black', linewidth=0.5, width=0.35)
                   x1, y1 = [CMS_HCC_RiskScore_AGND_PY_int, CMS_HCC_RiskScore_AGND_PY_int], [0,  max(n)+1]
-                  ax.set_title("Population Risk distribution of ACOs")
+                  ax.set_title("Population risk distribution of ACOs")
                   ax.set_xlabel('HCC RAF of Aged-Non Dual population in ACOs')
                   ax.set_ylabel('No. of ACOs in comparison group')
                   ax.yaxis.set_major_locator(MaxNLocator(integer=True))
@@ -564,6 +566,7 @@ if len(val3) != 0:
                   #ax.bar(x=x_pos, height=df3.QualityID_112, width=0.35,align='center') #Breast Cancer
                   ax.yaxis.set_major_locator(MaxNLocator(integer=True))
                   plt.xticks(x_pos, df3.ACO_Name.str[0:8])
+                  plt.xticks(rotation=90)
                   plt.tight_layout()
                   st.pyplot(fig)
 
@@ -591,11 +594,6 @@ if len(val3) != 0:
                   plt.show()
                   st.pyplot(fig)
 
-
-
-                  df3.hba1cc=100-df3.QualityID_001_WI
-                  df3.hba1cc.astype(int)
-
                   df3['QualityID_113'].astype(float)
                   df3['QualityID_112'].astype(float)
 
@@ -618,6 +616,7 @@ if len(val3) != 0:
                   #ax.bar(x=x_pos, height=df3.QualityID_112, width=0.35,align='center') #Breast Cancer
                   ax.yaxis.set_major_locator(MaxNLocator(integer=True))
                   plt.xticks(x_pos, df3.ACO_Name.str[0:8])
+                  plt.xticks(rotation=90)
                   plt.tight_layout()
                   st.pyplot(fig)
 
@@ -667,6 +666,7 @@ if len(val3) != 0:
                   ax.bar(x=x_pos, height=df3.QualityID_112, width=0.35,align='center', color=clrs) #Breast Cancer
                   ax.yaxis.set_major_locator(MaxNLocator(integer=True))
                   plt.xticks(x_pos, df3.ACO_Name.str[0:8])
+                  plt.xticks(rotation=90)
                   plt.tight_layout()
                   st.pyplot(fig)
 
@@ -701,6 +701,7 @@ if len(val3) != 0:
 
                   st.subheader("Diabetes Management")
                   df3['hba1ccc']=100-(df3.QualityID_001_WI)
+                  df3.hba1ccc.astype(float)
                   df3=df3.sort_values(by=['hba1ccc'])
                   mat=list(df3.ACO_ID)
                   clrs=[]
@@ -717,6 +718,7 @@ if len(val3) != 0:
                   ax.bar(x=x_pos, height=df3.hba1ccc, width=0.25,align='center', color=clrs) #Diabetes control (inverse is better)
                   ax.yaxis.set_major_locator(MaxNLocator(integer=True))
                   plt.xticks(x_pos, df3.ACO_Name.str[0:8])
+                  plt.xticks(rotation=90)
                   plt.tight_layout()
                   st.pyplot(fig)
 
@@ -762,8 +764,9 @@ if len(val3) != 0:
                   st.pyplot(fig)
 
                   st.subheader("Hospice Expenses")
-                  df3['CapAnn_HSP']=df3['CapAnn_HSP'].str.replace(",","")
+#                  df3['CapAnn_HSP']=df3['CapAnn_HSP'].str.replace(",","")
                   df3['CapAnn_HSP']= pd.to_numeric(df3['CapAnn_HSP'])
+#                  df_sav.CapAnn_HSP =df_sav.CapAnn_HSP.apply(pd.to_numeric, errors='coerce')
 
                   fig = plt.figure()
                   fig,ax = plt.subplots(1,1)

@@ -259,7 +259,7 @@ if len(val3) != 0:
 
                   df3=df3.drop_duplicates(subset=['ACO_ID'])
                   df3['Sav_Rate']=df3['Sav_Rate'].round(2)
-                  st.subheader("Savings Rates of your ACO in comparison with others")
+                  st.subheader("Saving Rates (%) of your ACO in comparison with others")
                   if val1=="YES":
                       st.write(f"This list has 'High Revenue' ACOs only")
                   if val1=="NO":

@@ -159,7 +159,7 @@ st.caption('Made with \u2764\uFE0F @manas8u in Python and Streamlit')
 st.caption('Understand the somewhat \U0001F479 nature of this version')
 st.caption('Please share your feedback and suggestions. DM @manas8u')
 
-st.write("This is a analytics report of 2021 performance year to help ACOs understand and contextualize their performance.")
+st.write("This is a analytics report of 2022 performance year to help ACOs understand and contextualize their performance.")
 st.write('This report is customized by entering ACO of interest.')
 st.write('Overall ACO performance statistics are available towards the end of the report.')
 st.write('To tailor the comparison, what might be your ACO of interest. You can look up your ACO_ID on CMS  website. Please toggle between Basic filtering and Advanced filtering till you can identify ACO that you are looking for.') 
